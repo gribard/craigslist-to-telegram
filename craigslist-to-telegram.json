@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "name": "Craigslist Free Stuff Updates To Telegram",
+  "description": "No description provided",
+  "source_url": false,
+  "guid": "0eee66a501cb8c3390282952b4f1df21",
+  "tag_fg_color": "#ffffff",
+  "tag_bg_color": "#72df7e",
+  "icon": "gear",
+  "exported_at": "2023-09-20T11:30:09Z",
+  "agents": [
+    {
+      "type": "Agents::EventFormattingAgent",
+      "name": "format CL Free Stuff post for telegram",
+      "disabled": false,
+      "guid": "522e6df8a58ab789de3d688a39bd9cf1",
+      "options": {
+        "instructions": {
+          "title": "{{title}}",
+          "url": "{{url}}",
+          "text": "{{description}}",
+          "photo": "{{thumbs | as_object}}"
+        },
+        "matchers": [],
+        "mode": "clean"
+      },
+      "keep_events_for": 0,
+      "propagate_immediately": true
+    },
+    {
+      "type": "Agents::JavaScriptAgent",
+      "name": "cl Free Stuff transform single post for telegram ",
+      "disabled": false,
+      "guid": "5cb872e7ca543c5fdafd3d420b989681",
+      "options": {
+        "language": "JavaScript",
+        "code": "Agent.check = function() {\r\n  if (this.options('make_event')) {\r\n    \r\n    // var tg_msg = this.memory('tg_msg');\r\n    // this.createEvent({ tg_msg });\r\n    // if(tg_msg){\r\n    //   this.createEvent({ tg_msg });\r\n    // }\r\n  }\r\n};\r\n\r\nfunction splitArray(array) {\r\n  let result = [];\r\n  for (let i = 0; i < array.length; i += 10) {\r\n    result.push(array.slice(i, i + 10));\r\n  }\r\n  return result;\r\n}\r\n\r\nAgent.receive = function() {\r\n  console.log('suka');\r\n  var events = this.incomingEvents();\r\n  for(var i = 0; i < events.length; i++) {\r\n        var event = events[i];\r\n    var msg = event.payload;\r\n    \r\n    var tg_msg = {};\r\n    tg_msg.title = msg.title;\r\n    tg_msg.url = msg.url;\r\n    \r\n    tg_msg.text = msg.text.replace(\"\\n        \\n            QR Code Link to This Post\\n            \\n        \\n\",\"\");\r\n    tg_msg.text = tg_msg.text.replace(\"\\n    \",\"\");\r\n    tg_msg.text = tg_msg.text.trim();\r\n    \r\n    \r\n    tg_msg.text = \"<a href=\\\"\" + tg_msg.url  + \"\\\">\" + tg_msg.title + \"</a>\\n\\n\" + tg_msg.text;\r\n\r\n    var photos = msg.photo;\r\n    var tg_photos = []\r\n    \r\n    for(var j = 0; j < photos.length; j++) {\r\n      let pic = photos[j];\r\n      pic = pic.replace(\"600x450\", \"1200x900\");\r\n      \r\n      var ph = {\r\n        type: \"photo\",\r\n        media: pic\r\n      }\r\n      tg_photos.push(ph)\r\n    }  \r\n    \r\n    if(tg_photos.length > 0) \r\n    {\r\n      let photo_arrays = splitArray(tg_photos);\r\n    \r\n      for(var k = 0; k < photo_arrays.length; k++){\r\n        let group = photo_arrays[k];\r\n        tg_msg.group = group;\r\n        // this.memory('tg_msg', tg_msg);\r\n        this.createEvent(tg_msg);\r\n      }  \r\n    }else{\r\n              this.createEvent(tg_msg);\r\n    }\r\n    \r\n  }\r\n}",
+        "expected_receive_period_in_days": "1",
+        "expected_update_period_in_days": "1"
+      },
+      "schedule": "never",
+      "keep_events_for": 0,
+      "propagate_immediately": true
+    },
+    {
+      "type": "Agents::WebsiteAgent",
+      "name": "cl Free Stuff single post",
+      "disabled": false,
+      "guid": "8f3b509950c11171164199d4627008a1",
+      "options": {
+        "expected_update_period_in_days": "1",
+        "url_from_event": "{{url}}",
+        "type": "html",
+        "mode": "merge",
+        "extract": {
+          "thumbs": {
+            "xpath": "//a[@class=\"thumb\"]/@href",
+            "value": ".",
+            "array": "true"
+          },
+          "description": {
+            "xpath": "//*[@id=\"postingbody\"]",
+            "value": "string(.)"
+          }
+        }
+      },
+      "schedule": "never",
+      "keep_events_for": 0,
+      "propagate_immediately": true
+    },
+    {
+      "type": "Agents::TelegramAgent",
+      "name": "send cl Free Stuff post to telegram",
+      "disabled": false,
+      "guid": "9bf8a866f81eec6f93158b7a014e9101",
+      "options": {
+        "auth_token": "{% credential telegram_auth_token %}",
+        "chat_id": "{% credential telegram_chat_id %}",
+        "caption": "{{title}}",
+        "disable_notification": "",
+        "disable_web_page_preview": "",
+        "long_message": "",
+        "parse_mode": "html"
+      },
+      "propagate_immediately": true
+    },
+    {
+      "type": "Agents::PhantomJsCloudAgent",
+      "name": "▶ ▶ ▶ Craigslist Free Stuff render PhantomJS",
+      "disabled": false,
+      "guid": "c7cb5ddd4c1c6b2f6780abae12752bc1",
+      "options": {
+        "mode": "clean",
+        "api_key": "{% credential phantomjs_apikey %}",
+        "url": "https://sfbay.craigslist.org/search/san-francisco-ca/zip?lat=37.7419&lon=-122.4361&search_distance=2.1#search=1~gallery~0~0",
+        "render_type": "html",
+        "output_as_json_radio": "false",
+        "output_as_json": "false",
+        "ignore_images_radio": "false",
+        "ignore_images": "false",
+        "user_agent": "Mozilla/5.0 (BlackBerry; U; BlackBerry 9900; en) AppleWebKit/534.11+ (KHTML, like Gecko) Version/7.1.0.346 Mobile Safari/534.11+",
+        "wait_interval": "1000"
+      },
+      "schedule": "every_10m",
+      "keep_events_for": 0,
+      "propagate_immediately": true
+    },
+    {
+      "type": "Agents::WebsiteAgent",
+      "name": "cl Free Stuff website agent",
+      "disabled": false,
+      "guid": "d90e5198bb5e599d552031e07f83f591",
+      "options": {
+        "expected_update_period_in_days": "1",
+        "url_from_event": "{{url}}",
+        "type": "html",
+        "mode": "on_change",
+        "extract": {
+          "url": {
+            "xpath": "//li[@class=\"cl-search-result cl-search-view-mode-gallery\"]/div[@class=\"gallery-card\"]/a/@href",
+            "value": "."
+          },
+          "title": {
+            "xpath": "//li[@class=\"cl-search-result cl-search-view-mode-gallery\"]/@title",
+            "value": "."
+          }
+        }
+      },
+      "schedule": "never",
+      "keep_events_for": 0,
+      "propagate_immediately": true
+    }
+  ],
+  "links": [
+    {
+      "source": 0,
+      "receiver": 1
+    },
+    {
+      "source": 1,
+      "receiver": 3
+    },
+    {
+      "source": 2,
+      "receiver": 0
+    },
+    {
+      "source": 4,
+      "receiver": 5
+    },
+    {
+      "source": 5,
+      "receiver": 2
+    }
+  ],
+  "control_links": []
+}
