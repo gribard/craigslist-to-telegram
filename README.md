@@ -50,12 +50,19 @@ You will need:
 
    `https://sfbay.craigslist.org/search/san-francisco-ca/zip?lat=37.7419&lon=-122.4361&search_distance=2.1#search=1~gallery~0~0`
 
-2. `PhantomJS APIKey`. You can find it in your PhantomJS account.
-3. `Telegram Bot API`.
+   Replace the URL with your own.
+2. If you changed the name of the credentials in previous steps, you need to change them here as well.
 
-## Step 5: Import ``
+## Step 5: Import `craigslist-to-telegram-scenario.json` into huginn
+Log in into your huginn instance and go to "Scenarios" in the main menu. Click on "Import Scenario" and choose the `craigslist-to-telegram-scenario.json` you edited in the previous step.
+
+## Step 6: Run the scenario
+Go to "Scenarios" and click on "Craigslist Free Stuff Updates To Telegram". Find the agent "▶ ▶ ▶ Craigslist Free Stuff in Phoenix render PhantomJS" and click "Run" from the "Actions" menu.
+
+From now on, you will get updates every 10 minutes to your telegram account.
 
 # Credits
+Thanks to Andrew Cantino for Huginn: https://github.com/huginn/huginn
 
 Great guides provided by:
 
